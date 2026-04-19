@@ -42,27 +42,31 @@ class GTRSBmodel(nn.Module):
     def forward(self,input):
         return self.model(input)
 
-
 class Cifarmodel(nn.Module):
-    def __init__(self,class_num=10):
+    def __init__(self, class_num=10):
         super(Cifarmodel, self).__init__()
         self.model = nn.Sequential(
-            nn.Conv2d(in_channels=3,out_channels=20,kernel_size=7,stride=1,padding=2),  #只有1层报错ValueError: could not broadcast input array from shape (10,3,3,3) into shape (10,)
+            nn.Conv2d(in_channels=3, out_channels=20, kernel_size=7, stride=1, padding=2),
+            # 参数1：分组数（通常设为通道数的因数，比如2或5）；参数2：通道数
+            nn.GroupNorm(num_groups=2, num_channels=20), 
             nn.ReLU(),
             nn.AvgPool2d(2),
-            nn.Conv2d(in_channels=20,out_channels=40,kernel_size=4,stride=1,padding=2,bias=False),  #out_channels =10  model = np.array(model,dtype=object)报错
+            
+            nn.Conv2d(in_channels=20, out_channels=40, kernel_size=4, stride=1, padding=2, bias=False),
+            nn.GroupNorm(num_groups=4, num_channels=40), 
             nn.ReLU(),
-            nn.MaxPool2d(2),  #默认步幅与kernalsize相同
-            nn.Conv2d(in_channels=40, out_channels=64, kernel_size=3, stride=1,padding=1),
+            nn.MaxPool2d(2),
+            
+            nn.Conv2d(in_channels=40, out_channels=64, kernel_size=3, stride=1, padding=1),
+            nn.GroupNorm(num_groups=4, num_channels=64), 
             nn.Flatten(),
-            nn.Linear(8*8*64,64),
-            nn.Linear(64,10)
-
-
-
+            
+            nn.Linear(8*8*64, 512),
+            nn.ReLU(),
+            nn.Linear(512, 10)
         )
 
-    def forward(self,input):
+    def forward(self, input):
         return self.model(input)
 
 
